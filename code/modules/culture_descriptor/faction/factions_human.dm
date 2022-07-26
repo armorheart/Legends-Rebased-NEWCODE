@@ -12,6 +12,20 @@
 	its massive bureaucracy and the distance between worlds. Through its member states, the SCG governs as one of the \
 	most advanced and powerful civilisations in the known galaxy."
 
+/decl/cultural_info/faction/galacticempire
+	name = FACTION_GALACTIC_EMPIRE
+	description = "The Galactic Empire, commonly referred to as the Old Empire or the First Galactic Empire , is a authoritarian empire \
+	composed of numerous human member states spanning many systems.\
+	Based in the Sol System and with most seats of Government on Olympus, Mars,\
+	the Galactic Empire governs the majority of the galaxy.\
+	Its primary governing body is the senate which are led by the emperor. \
+	Member states have a great degree of restrictions in their actions, though the Galactic Empire manages human centrist ideals, \
+	domestic security, economic policy, and diplomacy for humanity as a whole. The Empire's population is diverse \
+	including many non-humans (though they are not citizens) and encompassing a wide range of sectors, territories \
+	habitats, and celestial bodies. However, it is large, cumbersome, moderately quick to respond to issues. \
+	its massive bureaucracy and the distance between worlds. Through its member states, the Galactic Empire governs as one of the \
+	most advanced and powerful civilisations in the known galaxy."
+
 
 /decl/cultural_info/faction/scg/fleet
 	name = FACTION_FLEET

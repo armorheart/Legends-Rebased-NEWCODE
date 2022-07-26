@@ -29,7 +29,7 @@
 	. = ..()
 	if(.)
 		return H.skill_check(SKILL_HAULING, SKILL_EXPERT) //Hard for them to swim
-	
+
 /datum/species/human/spacer
 	name = SPECIES_SPACER
 	name_plural = "Space-Adapted Humans"
@@ -91,10 +91,10 @@
 		)
 
 	additional_available_cultural_info = list(
-		TAG_CULTURE = list(CULTURE_HUMAN_VATGROWN)
+//		TAG_CULTURE = list(CULTURE_HUMAN_VATGROWN)
 	)
 	default_cultural_info = list(
-		TAG_CULTURE = CULTURE_HUMAN_VATGROWN
+//		TAG_CULTURE = CULTURE_HUMAN_VATGROWN
 	)
 
 /datum/species/human/tritonian

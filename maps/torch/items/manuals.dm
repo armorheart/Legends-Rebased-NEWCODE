@@ -1,9 +1,9 @@
 /obj/item/book/manual/solgov_law
-	name = "Sol Central Government Law"
+	name = "Galactic Law"
 	desc = "A brief overview of SolGov Law."
 	icon_state = "bookSolGovLaw"
-	author = "The Sol Central Government"
-	title = "Sol Central Government Law"
+	author = "The Galactic Empire"
+	title = "Galactic Law"
 
 /obj/item/book/manual/solgov_law/Initialize()
 	. = ..()

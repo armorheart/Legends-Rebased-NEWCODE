@@ -166,7 +166,6 @@
 	base_color = "#066000"
 	reagent_tag = IS_UNATHI
 	force_cultural_info = list(
-		TAG_CULTURE =   CULTURE_STOK,
 		TAG_HOMEWORLD = HOME_SYSTEM_STATELESS,
 		TAG_FACTION =   FACTION_TEST_SUBJECTS
 	)

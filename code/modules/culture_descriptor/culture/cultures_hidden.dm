@@ -4,7 +4,7 @@
 	hidden_from_codex = TRUE
 
 /decl/cultural_info/culture/hidden/alium
-	name = CULTURE_ALIUM
+//	name = CULTURE_ALIUM
 	language = LANGUAGE_ALIUM
 	secondary_langs = null
 
