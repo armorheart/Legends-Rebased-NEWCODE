@@ -1043,3 +1043,250 @@
 					W.bleed_timer = 0
 					W.clamped = TRUE
 					E.status &= ~ORGAN_BLEEDING
+
+// Star Wars Medical ///////////////////////////////////////////////////////////////////////////////
+
+/datum/reagent/coagulin
+	name = "Coagulin"
+	description = "A remarkable coagulant capable of stopping both internal and external bleeding."
+	taste_description = "bitter"
+	reagent_state = LIQUID
+	color = "#A25714"
+	metabolism = REM * 0.075
+	scannable = TRUE
+
+/datum/reagent/coagulin/affect_blood(mob/living/carbon/M, alien, removed)
+	if(ishuman(M))
+		for(var/obj/item/organ/external/E in M.organs)
+			if(E.status & ORGAN_ARTERY_CUT && prob(15))
+				E.status &= ~ORGAN_ARTERY_CUT
+			for(var/datum/wound/W in E.wounds)
+				if(W.bleeding() && prob(25))
+					W.bleed_timer = 0
+					W.clamped = TRUE
+					E.status &= ~ORGAN_BLEEDING
+
+/datum/reagent/enkephalin
+	name = "Enkephalin"
+	description = "A very cheap medicine that can treat moderate burns well."
+	taste_description = "slimey"
+	reagent_state = LIQUID
+	color = "#2CAED8"
+	metabolism = REM * 0.055
+	scannable = TRUE
+
+/datum/reagent/enkephalin/affect_blood(mob/living/carbon/M, alien, removed)
+	if(ishuman (M))
+		M.heal_organ_damage(0, 18 * removed)
+
+/datum/reagent/anodyne
+	name = "Anodyne"
+	description = "A very baseline medicine useful for treating burn and burn damage."
+	taste_description = "sweetly sickly"
+	reagent_state = LIQUID
+	color = "#52B4A8"
+	overdose = REAGENTS_OVERDOSE * 0.5
+	metabolism = REM * 0.032
+	scannable = TRUE
+
+/datum/reagent/anodyne/affect_blood(mob/living/carbon/M, alien, removed)
+	if (ishuman (M))
+		M.heal_organ_damage(0, 25 * removed)
+		M.add_chemical_effect(CE_BLOCKAGE, (15 + volume - overdose)/100)
+		var/mob/living/carbon/human/H = M
+		for(var/obj/item/organ/external/E in H.organs)
+			if(E.status & ORGAN_ARTERY_CUT && prob(2))
+				E.status &= ~ORGAN_ARTERY_CUT
+
+/datum/reagent/corwindyl
+	name = "Corwindyl"
+	description = "A common mild painkiller throughout the galaxy, don't take with alcohol."
+	taste_description = "strange"
+	reagent_state = LIQUID
+	color = "#6E29AC"
+	overdose = 30
+	metabolism = REM * 0.066
+	ingest_met = 0.02
+	scannable = TRUE
+	var/pain_power = 80 //magnitide of painkilling effect
+	var/effective_dose = 0.5 //how many units it need to process to reach max power
+
+/datum/reagent/corwindyl/affect_blood(var/mob/living/carbon/M, var/alien, var/removed)
+	var/effectiveness = 1
+	if(M.chem_doses[type] < effective_dose) //some ease-in ease-out for the effect
+		effectiveness = M.chem_doses[type]/effective_dose
+	else if(volume < effective_dose)
+		effectiveness = volume/effective_dose
+	M.add_chemical_effect(CE_PAINKILLER, pain_power * effectiveness)
+	if(M.chem_doses[type] > 0.5 * overdose)
+		M.add_chemical_effect(CE_SLOWDOWN, 1)
+		if(prob(1))
+			M.slurring = max(M.slurring, 10)
+	if(M.chem_doses[type] > 0.75 * overdose)
+		M.add_chemical_effect(CE_SLOWDOWN, 1)
+		if(prob(5))
+			M.slurring = max(M.slurring, 20)
+	if(M.chem_doses[type] > overdose)
+		M.add_chemical_effect(CE_SLOWDOWN, 1)
+		M.slurring = max(M.slurring, 30)
+		if(prob(1))
+			M.Weaken(2)
+			M.drowsyness = max(M.drowsyness, 5)
+	var/boozed = isboozed(M)
+	if(boozed)
+		M.add_chemical_effect(CE_ALCOHOL_TOXIC, 1)
+		M.add_chemical_effect(CE_BREATHLOSS, 0.1 * boozed) //drinking and opiating makes breathing kinda hard
+
+/datum/reagent/corwindyl/overdose(var/mob/living/carbon/M, var/alien)
+	..()
+	M.hallucination(120, 30)
+	M.druggy = max(M.druggy, 10)
+	M.add_chemical_effect(CE_PAINKILLER, pain_power*0.5) //extra painkilling for extra trouble
+	M.add_chemical_effect(CE_BREATHLOSS, 0.6) //Have trouble breathing, need more air
+	if(isboozed(M))
+		M.add_chemical_effect(CE_BREATHLOSS, 0.4) //Don't drink and OD on opiates folks
+
+/datum/reagent/corwindyl/proc/isboozed(var/mob/living/carbon/M)
+	. = 0
+	var/datum/reagents/ingested = M.get_ingested_reagents()
+	if(ingested)
+		var/list/pool = M.reagents.reagent_list | ingested.reagent_list
+		for(var/datum/reagent/ethanol/booze in pool)
+			if(M.chem_doses[booze.type] < 2) //let them experience false security at first
+				continue
+			. = 1
+			if(booze.strength < 40) //liquor stuff hits harder
+				return 2
+
+/datum/reagent/spactacillin
+	name = "Spactacillin"
+	description = "An all-purpose antiviral agent."
+	taste_description = "extreme bitterness"
+	reagent_state = LIQUID
+	color = "#9A0954"
+	metabolism = REM * 0.15
+	overdose = REAGENTS_OVERDOSE/2
+	scannable = 1
+	value = 2.5
+
+/datum/reagent/spactacillin/affect_blood(var/mob/living/carbon/M, var/alien, var/removed)
+	M.immunity = max(M.immunity - 0.1, 0)
+	M.add_chemical_effect(CE_ANTIVIRAL, VIRUS_COMMON)
+	M.add_chemical_effect(CE_ANTIBIOTIC, 1)
+	if(volume > 10)
+		M.immunity = max(M.immunity - 0.3, 0)
+		M.add_chemical_effect(CE_ANTIVIRAL, VIRUS_ENGINEERED)
+	if(M.chem_doses[type] > 15)
+		M.immunity = max(M.immunity - 0.25, 0)
+
+/datum/reagent/spactacillin/overdose(var/mob/living/carbon/M, var/alien)
+	..()
+	M.immunity = max(M.immunity - 0.25, 0)
+	M.add_chemical_effect(CE_ANTIVIRAL, VIRUS_EXOTIC)
+	if(prob(2))
+		M.immunity_norm = max(M.immunity_norm - 1, 0)
+
+/datum/reagent/cardinex
+	name = "Cardinex"
+	description = "A very strong yet slow reacting Anti-Toxification medicine, don't mix with Anodyne."
+	taste_description = "vaguely bitter"
+	reagent_state = LIQUID
+	color = "#3D5EC6"
+	metabolism = REM * 0.38
+	scannable = 1
+	flags = IGNORE_MOB_SIZE
+	value = 2.1
+	var/remove_generic = 1
+	var/list/remove_toxins = list(
+		/datum/reagent/toxin/zombiepowder
+	)
+
+/datum/reagent/cardinex/affect_blood(var/mob/living/carbon/M, var/alien, var/removed)
+	if(remove_generic)
+		M.drowsyness = max(0, M.drowsyness - 8.5 * removed)
+		M.adjust_hallucination(-10 * removed)
+		M.add_up_to_chemical_effect(CE_ANTITOX, 1)
+
+	var/removing = (4 * removed)
+	var/datum/reagents/ingested = M.get_ingested_reagents()
+	for(var/datum/reagent/R in ingested.reagent_list)
+		if((remove_generic && istype(R, /datum/reagent/toxin)) || (R.type in remove_toxins))
+			ingested.remove_reagent(R.type, removing)
+			return
+	for(var/datum/reagent/R in M.reagents.reagent_list)
+		if((remove_generic && istype(R, /datum/reagent/toxin)) || (R.type in remove_toxins))
+			M.reagents.remove_reagent(R.type, removing)
+			return
+
+/datum/reagent/stimufrost
+	name = "Stimufrost"
+	description = "A weak painkiller for minor aches, is not a good substance to OD on."
+	taste_description = "frosty"
+	reagent_state = LIQUID
+	color = "#00F9FD"
+	metabolism = REM * 0.58
+	overdose = 50
+	reagent_state = LIQUID
+	scannable = 1
+	flags = IGNORE_MOB_SIZE
+	value = 3.3
+
+/datum/reagent/stimufrost/affect_blood(var/mob/living/carbon/M, var/alien, var/removed)
+	M.add_chemical_effect(CE_PAINKILLER, 35)
+
+/datum/reagent/stimufrost/overdose(var/mob/living/carbon/M, var/alien, var/removed)
+	M.add_chemical_effect(CE_TOXIN, 1)
+	M.take_organ_damage(0, removed * 2.8)
+	M.druggy = max(M.druggy, 2)
+	M.add_chemical_effect(CE_PAINKILLER, 10)
+
+/datum/reagent/elisinandrox
+	name = "Elisinandrox"
+	description = "A very useful anti-radiation medicine for basic treatment."
+	taste_description = "nasty"
+	reagent_state = LIQUID
+	color = "#239200"
+	metabolism = REM * 0.45
+	scannable = 1
+	flags = IGNORE_MOB_SIZE
+
+/datum/reagent/elisinandrox/affect_blood(var/mob/living/carbon/M, var/alien, var/removed)
+	M.radiation = max(M.radiation - 80 * removed, 0)
+	M.adjustToxLoss(-15 * removed)
+	if(prob(60))
+		M.take_organ_damage(4 * removed, 0, ORGAN_DAMAGE_FLESH_ONLY)
+
+/datum/reagent/triptophagea
+	name = "Triptophagea"
+	description = "A strong anti-fever medicine, could bring down the body temperature to stable."
+	taste_description = "neutral"
+	reagent_state = LIQUID
+	color = "#c29748"
+	metabolism = REM * 0.85
+
+/datum/reagent/triptophagea/affect_blood(var/mob/living/carbon/M, var/alien, var/removed)
+	if(M.bodytemperature > 310)
+		M.bodytemperature = max(310, M.bodytemperature - (40 * TEMPERATURE_DAMAGE_COEFFICIENT))
+	else if(M.bodytemperature < 311)
+		M.bodytemperature = min(310, M.bodytemperature + (40 * TEMPERATURE_DAMAGE_COEFFICIENT))
+
+/datum/reagent/myocaine
+	name = "Myocaine"
+	description = "A very strong muscle relaxant, gives off a good feeling."
+	taste_description = "rotten"
+	reagent_state = LIQUID
+	color = "#536e73"
+	metabolism = REM * 0.95
+
+/datum/reagent/myocaine/affect_blood(var/mob/living/carbon/M, var/alien, var/removed)
+	if(prob(volume*20))
+		M.add_chemical_effect(CE_PULSE, 1)
+		M.add_chemical_effect(CE_PAINKILLER, 5)
+	if(volume <= 0.02 && M.chem_doses[type] >= 0.05 && world.time > data + ANTIDEPRESSANT_MESSAGE_DELAY * 0.3)
+		data = world.time
+		to_chat(M, "<span class='warning'>You feel antsy, your concentration wavers...</span>")
+	else
+		if(world.time > data + ANTIDEPRESSANT_MESSAGE_DELAY * 0.3)
+			data = world.time
+			to_chat(M, "<span class='notice'>Your muscles feel relaxed and nummed.</span>")
+

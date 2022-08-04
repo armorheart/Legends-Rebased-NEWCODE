@@ -1176,3 +1176,91 @@
 	color = "#837e79"
 	value = 4
 	strength = 7
+
+// Star Wars Toxins ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/datum/reagent/toxin/cyanogen
+	name = "Cyanogen"
+	description = "A chemical that is highly potent when ingested by humaniod beings."
+	taste_description = "death"
+	color = "#CFEA22"
+	strength = 6.5
+	hidden_from_codex = TRUE
+	heating_point = 100 CELSIUS
+	heating_products = list(/datum/reagent/toxin/cyanogenb)
+
+/datum/reagent/toxin/cyanogen/affect_blood(var/mob/living/carbon/M, var/alien, var/removed)
+	..()
+	M.sleeping += 3
+
+/datum/reagent/toxin/cyanogenb
+	name = "Cyanogen-N"
+	description = "A neutralized chemical made from heating Cyanogen."
+	taste_description = "blandness"
+	color = "#98AB22"
+	strength = 0
+	hidden_from_codex = TRUE
+
+/datum/reagent/toxin/cyansilicate
+	name = "Cyanogen-silicate"
+	description = "A chemical mixture that is deadly when ingested by humaniod beings."
+	taste_description = "greater death"
+	color = "#BDBA55"
+	strength = 10.5
+	hidden_from_codex = TRUE
+
+/datum/reagent/toxin/cyansilicate/affect_blood(mob/living/carbon/M, alien, removed)
+	if (prob(50))
+		M.adjustToxLoss(0.5 * removed)
+	if (prob(50))
+		M.custom_pain("You are getting unbearably hot!", 30)
+		if (prob(10))
+			to_chat(M, SPAN_DANGER("You feel like your insides are melting!"))
+		else if (prob(20))
+			M.visible_message(SPAN_WARNING("[M] [pick("dry heaves!","coughs!","splutters!","rubs at their eyes!")]"))
+	else
+		M.eye_blurry = max(M.eye_blurry, 10)
+
+/datum/reagent/toxin/deraformine
+	name = "Deraformine"
+	description = "A strong neurotoxin that puts the subject into a death-like state."
+	taste_description = "death"
+	reagent_state = SOLID
+	color = "#7F00B6"
+	metabolism = REM
+	strength = 3
+	target_organ = BP_BRAIN
+	heating_message = "melts into a liquid slurry."
+	heating_products = list(/datum/reagent/toxin/cyanogenb)
+
+/datum/reagent/toxin/deraformine/affect_blood(var/mob/living/carbon/M, var/alien, var/removed)
+	..()
+	if(alien == IS_DIONA)
+		return
+	M.status_flags |= FAKEDEATH
+	M.adjustOxyLoss(3 * removed)
+	M.Weaken(10)
+	M.silent = max(M.silent, 10)
+	if(M.chem_doses[type] <= removed) //half-assed attempt to make timeofdeath update only at the onset
+		M.timeofdeath = world.time
+	M.add_chemical_effect(CE_NOPULSE, 1)
+
+/datum/reagent/toxin/deraformine/Destroy()
+	if(holder && holder.my_atom && ismob(holder.my_atom))
+		var/mob/M = holder.my_atom
+		M.status_flags &= ~FAKEDEATH
+	. = ..()
+
+/datum/reagent/toxin/imobilin
+	name = "Imobilin"
+	description = "A chemical that shuts down the motor functions."
+	taste_description = "numness"
+	reagent_state = LIQUID
+	color = "#2ab0a3"
+	strength = 2.5
+	target_organ = BP_CHEST
+
+/datum/reagent/toxin/imobilin/affect_blood(var/mob/living/carbon/M, var/alien, var/removed)
+	..()
+	if (prob(10))
+		M.Paralyse(20)
